@@ -1694,32 +1694,52 @@ function parseCSV(csv) {
   }
   const iAcc     = idx('blended account name') >= 0 ? idx('blended account name')
                  : idx('blended account') >= 0 ? idx('blended account') : idx('account');
-  // Col D: Meta Ads Amount spent
+  // Investimento
   const iSpent   = idx('meta ads amount spent') >= 0 ? idx('meta ads amount spent')
-                 : idx('meta ads amount') >= 0 ? idx('meta ads amount')
                  : idx('amount spent') >= 0 ? idx('amount spent') : idx('spent');
-  // Col C: Blended Link Clicks (cliques no link dos anúncios)
+  // Cliques no link
   const iClicks  = idx('blended link clicks') >= 0 ? idx('blended link clicks')
-                 : idx('blended link cli') >= 0 ? idx('blended link cli')
                  : idx('link clicks') >= 0 ? idx('link clicks') : idx('clicks');
-  // Col E (idx 4): Blended Ads impressions — valor baixo/errado para Meta Ads
-  // Col F (idx 5): Blended Post reach — contém impressões reais dos anúncios Meta
-  // Usar Blended Post reach como fonte de impressões
-  const iImpress = idx('blended post reach') >= 0 ? idx('blended post reach')
-                 : idx('blended ads impressions') >= 0 ? idx('blended ads impressions')
-                 : idx('impressions');
-  // Col K: Blended Total reach (alcance total)
-  const iReach   = idx('blended total reach') >= 0 ? idx('blended total reach')
+  // Impressões: usar Blended Ads impressions (col4) — valor correto para Meta Ads
+  const iImpress = idx('blended ads impressions') >= 0 ? idx('blended ads impressions')
                  : idx('blended post reach') >= 0 ? idx('blended post reach')
+                 : idx('impressions');
+  // Alcance: Meta Ads Reach (nova coluna) — alcance diário dos anúncios
+  const iReach   = idx('meta ads reach') >= 0 ? idx('meta ads reach')
+                 : idx('blended total reach') >= 0 ? idx('blended total reach')
                  : idx('reach');
-  // Col H: Meta Ads CTR (All)
+  // CTR
   const iCtr     = idx('meta ads ctr (all)') >= 0 ? idx('meta ads ctr (all)')
                  : idx('meta ads ctr') >= 0 ? idx('meta ads ctr') : idx('ctr');
-  // Col I: Blended Page total followers
+  // Seguidores
   const iFollow  = idx('blended page total followers') >= 0 ? idx('blended page total followers')
-                 : idx('blended page total') >= 0 ? idx('blended page total')
                  : idx('followers') >= 0 ? idx('followers') : -1;
-  const iConvs   = idx('conversations') >= 0 ? idx('conversations') : -1;
+  // Conversas (nova coluna)
+  const iConvs   = idx('messaging conversations started') >= 0 ? idx('messaging conversations started')
+                 : idx('conversations started') >= 0 ? idx('conversations started')
+                 : idx('conversations') >= 0 ? idx('conversations') : -1;
+  // CPM
+  const iCpm     = idx('meta ads cpm') >= 0 ? idx('meta ads cpm')
+                 : idx('cpm') >= 0 ? idx('cpm') : -1;
+  // Frequência
+  const iFreq    = idx('meta ads frequency') >= 0 ? idx('meta ads frequency')
+                 : idx('frequency') >= 0 ? idx('frequency') : -1;
+  // Leads
+  const iLeads   = idx('meta ads leads') >= 0 ? idx('meta ads leads')
+                 : idx('leads') >= 0 ? idx('leads') : -1;
+  // Engajamentos
+  const iEng     = idx('meta ads post engagement') >= 0 ? idx('meta ads post engagement')
+                 : idx('post engagement') >= 0 ? idx('post engagement')
+                 : idx('engagement') >= 0 ? idx('engagement') : -1;
+  // Reações
+  const iReact   = idx('meta ads post reactions') >= 0 ? idx('meta ads post reactions')
+                 : idx('reactions') >= 0 ? idx('reactions') : -1;
+  // Compartilhamentos
+  const iShares  = idx('meta ads post shares') >= 0 ? idx('meta ads post shares')
+                 : idx('shares') >= 0 ? idx('shares') : -1;
+  // Salvamentos
+  const iSaves   = idx('meta ads post saves') >= 0 ? idx('meta ads post saves')
+                 : idx('saves') >= 0 ? idx('saves') : -1;
 
   // Mapeamento nomes reais das contas — exatamente como aparecem na planilha
   const CLIENT_MAP = {
@@ -1729,14 +1749,45 @@ function parseCSV(csv) {
     'Sólido Sentimento':  ['sólido sentimento', 'solido sentimento', 'sólido', 'solido'],
   };
 
+  // Usar data local (sem timezone) para evitar deslocamento UTC-3
+  const toLocalStr = d => {
+    const y = d.getFullYear();
+    const m = String(d.getMonth()+1).padStart(2,'0');
+    const day = String(d.getDate()).padStart(2,'0');
+    return y+'-'+m+'-'+day;
+  };
+
+  // Detectar data mais recente nos dados da planilha
+  // (evita problema: usuário tem dados de 2025 mas hoje é 2026)
+  let latestDateInData = null;
+  if (iDate >= 0) {
+    lines.slice(1).forEach(row => {
+      const dv = (row[iDate]||'').trim().slice(0,10);
+      if (/^\d{4}-\d{2}-\d{2}/.test(dv)) {
+        if (!latestDateInData || dv > latestDateInData) latestDateInData = dv;
+      }
+    });
+  }
+
   // Período selecionado
-  const pEnd   = periodEnd   || new Date();
-  const pStart = periodStart || new Date(pEnd - currentPeriod * 86400000);
-  const pStartStr = pStart.toISOString().slice(0,10);
-  const pEndStr   = pEnd.toISOString().slice(0,10);
+  let pEnd, pStart;
+  if (periodEnd) {
+    pEnd = periodEnd;
+    pStart = periodStart || new Date(pEnd - currentPeriod * 86400000);
+  } else if (latestDateInData) {
+    // Usar a data mais recente dos dados como pEnd
+    pEnd   = new Date(latestDateInData + 'T12:00:00');
+    pStart = new Date(pEnd - currentPeriod * 86400000);
+  } else {
+    pEnd   = new Date();
+    pStart = new Date(pEnd - currentPeriod * 86400000);
+  }
+  const pStartStr = toLocalStr(pStart);
+  const pEndStr   = toLocalStr(pEnd);
 
   let totSpent=0, totClicks=0, totImpress=0, totReach=0, totFollow=0, totConvs=0;
-  let ctrSum=0, ctrCount=0;
+  let totLeads=0, totEng=0, totReact=0, totShares=0, totSaves=0;
+  let ctrSum=0, ctrCount=0, cpmSum=0, cpmCount=0, freqSum=0, freqCount=0;
   const tl = {};
 
   lines.slice(1).forEach(row => {
@@ -1770,22 +1821,41 @@ function parseCSV(csv) {
     const imp    = parseInt  ((row[iImpress]||'').replace(/\D/g,'')) || 0;
     const reach  = parseInt  ((row[iReach]  ||'').replace(/\D/g,'')) || 0;
     const ctr    = parseFloat((row[iCtr]    ||'').replace(',','.'))   || 0;
-    const follow = iFollow >= 0 ? parseInt((row[iFollow]||'').replace(/\D/g,'')) || 0 : 0;
-    const convs  = iConvs  >= 0 ? parseInt((row[iConvs] ||'').replace(/\D/g,'')) || 0 : 0;
+    const follow = iFollow  >= 0 ? parseInt((row[iFollow] ||'').replace(/\D/g,'')) || 0 : 0;
+    const convs  = iConvs   >= 0 ? parseInt((row[iConvs]  ||'').replace(/\D/g,'')) || 0 : 0;
+    const cpm    = iCpm     >= 0 ? parseFloat((row[iCpm]  ||'').replace(',','.'))  || 0 : 0;
+    const freq   = iFreq    >= 0 ? parseFloat((row[iFreq] ||'').replace(',','.'))  || 0 : 0;
+    const leads  = iLeads   >= 0 ? parseInt((row[iLeads]  ||'').replace(/\D/g,'')) || 0 : 0;
+    const eng    = iEng     >= 0 ? parseInt((row[iEng]    ||'').replace(/\D/g,'')) || 0 : 0;
+    const react  = iReact   >= 0 ? parseInt((row[iReact]  ||'').replace(/\D/g,'')) || 0 : 0;
+    const shares = iShares  >= 0 ? parseInt((row[iShares] ||'').replace(/\D/g,'')) || 0 : 0;
+    const saves  = iSaves   >= 0 ? parseInt((row[iSaves]  ||'').replace(/\D/g,'')) || 0 : 0;
 
-    // Linha de anúncios = tem "anúncios" no nome da conta
+    // Apenas linhas de anúncios têm dados de Meta Ads
     const isAnunciosRow = acc.includes('anúncios') || acc.includes('anuncios');
+    if (!isAnunciosRow) {
+      // Linha orgânica: só pegar seguidores
+      if (follow > totFollow) totFollow = follow;
+      return;
+    }
+    // A partir daqui só processa linhas de anúncios
     totSpent   += spent;
     totClicks  += clicks;
-    totImpress += imp;  // somar todas as impressões
-    // Alcance: guardar máximo por dia para evitar duplicação
+    totImpress += imp;
+    totConvs   += convs;
+    totLeads   += leads;
+    totEng     += eng;
+    totReact   += react;
+    totShares  += shares;
+    totSaves   += saves;
+    // Alcance: somar por dia (alcance diário dos anúncios)
     if (reach > 0) {
       if (!tl[dt]) tl[dt] = {s:0, c:0, r:0};
-      if (reach > tl[dt].r) tl[dt].r = reach;
+      tl[dt].r += reach;
     }
-    totConvs   += convs;
-    if (follow > totFollow) totFollow = follow;
-    if (ctr > 0 && isAnunciosRow) { ctrSum += ctr; ctrCount++; }
+    if (ctr > 0)  { ctrSum  += ctr;  ctrCount++;  }
+    if (cpm > 0)  { cpmSum  += cpm;  cpmCount++;  }
+    if (freq > 0) { freqSum += freq; freqCount++; }
 
     if (dt) {
       if (!tl[dt]) tl[dt] = {s:0, c:0, r:0};
@@ -1839,14 +1909,24 @@ function parseCSV(csv) {
   }
   // Calcular alcance real: somar máximos diários (sem duplicar por múltiplas linhas/dia)
   const totReachCalc = Object.values(tl).reduce((sum, d) => sum + (d.r||0), 0);
+  // Debug novas colunas
+  showDebug(`Novos totais: Convs=${totConvs} Leads=${totLeads} Eng=${totEng} React=${totReact} Shares=${totShares} Saves=${totSaves}`, totConvs>0?'ok':'warn');
 
   if (totSpent > 0 || totClicks > 0 || totImpress > 0) {
     D.meta.investimento.v = Math.round(totSpent * 100) / 100;
     D.meta.cliques.v      = totClicks;
     D.meta.impressoes.v   = totImpress;
     D.meta.alcance.v      = totReachCalc || totReach;
-    if (totConvs > 0) D.meta.conversas.v = totConvs;
-    if (ctrCount > 0) D.meta.ctr.v = parseFloat((ctrSum / ctrCount).toFixed(2));
+    if (totConvs  > 0) D.meta.conversas.v        = totConvs;
+    if (totLeads  > 0) D.meta.leads.v             = totLeads;
+    if (totEng    > 0) D.meta.engajamentos.v      = totEng;
+    if (totReact  > 0) D.meta.reacoes.v           = totReact;
+    if (totShares > 0) D.meta.compartilhamentos.v = totShares;
+    if (totSaves  > 0) D.meta.saves.v             = totSaves;
+    if (ctrCount  > 0) D.meta.ctr.v   = parseFloat((ctrSum  / ctrCount).toFixed(2));
+    if (cpmCount  > 0) D.meta.cpm.v   = parseFloat((cpmSum  / cpmCount).toFixed(2));
+    if (freqCount > 0) D.meta.frequencia.v = parseFloat((freqSum / freqCount).toFixed(2));
+    if (ctrCount  > 0 && totClicks > 0 && totSpent > 0) D.meta.cpc.v = parseFloat((totSpent / totClicks).toFixed(2));
     if (totFollow > 0) D.instagram.seguidores.v = totFollow;
 
     const ds = Object.keys(tl).sort().slice(-14);
@@ -2358,14 +2438,14 @@ function applyPeriodModal() {
   const e = document.getElementById('pm-end').value;
   if (s && e) {
     // Usar UTC para evitar problema de timezone (data vira dia anterior)
-    periodStart = new Date(s + 'T00:00:00');
-    periodEnd   = new Date(e + 'T23:59:59');
+    periodStart = new Date(s + 'T12:00:00');
+    periodEnd   = new Date(e + 'T12:00:00');
     currentPeriod = Math.round((periodEnd - periodStart) / 86400000);
   }
   if (compMode === 'manual') {
     const cs = document.getElementById('pm-comp-start').value;
     const ce = document.getElementById('pm-comp-end').value;
-    if (cs && ce) { compStart = new Date(cs + 'T00:00:00'); compEnd = new Date(ce + 'T23:59:59'); }
+    if (cs && ce) { compStart = new Date(cs + 'T12:00:00'); compEnd = new Date(ce + 'T12:00:00'); }
   }
   updatePeriodDisplay();
   closePeriodModal();
