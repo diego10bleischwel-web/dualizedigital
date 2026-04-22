@@ -931,7 +931,7 @@ function showComparison() { return compMode !== 'none'; }
 // ═══════════════════════════════════════════════════
 // DADOS (simulados / + planilha)
 // ═══════════════════════════════════════════════════
-const SHEET_URL_DIRECT = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSL_ieJyN2jH_xNV0b9zHFb6ZtoKc_rRBMhTGvR6O27etK69s-eITqCCmZCNwbyCrZhCrnEyCBrua8b/pub?gid=0&single=true&output=csv';
+const SHEET_URL_DIRECT = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSL_ieJyN2jH_xNV0b9zHFb6ZtoKc_rRBMhTGvR6O27etK69s-eITqCCmZCNwbyCrZhCrnEyCBrua8b/pub?gid=0&single=true&output=csv&t='+Date.now();
 const SHEET_URL_PROXY  = 'https://corsproxy.io/?https%3A//docs.google.com/spreadsheets/d/e/2PACX-1vSL_ieJyN2jH_xNV0b9zHFb6ZtoKc_rRBMhTGvR6O27etK69s-eITqCCmZCNwbyCrZhCrnEyCBrua8b/pub%3Fgid%3D0%26single%3Dtrue%26output%3Dcsv';
 
 // ── Dados por cliente (lidos da planilha / fallback simulado) ──
@@ -1625,7 +1625,8 @@ async function loadData() {
       const text = await r.text();
       if (!text || text.length < 200) throw new Error('Vazio');
       csv = text;
-      showDebug('Planilha OK: ' + text.trim().split('\n').length + ' linhas', 'ok');
+      const cols = text.trim().split('\n')[0].split(',').length;
+      showDebug('Planilha OK: ' + text.trim().split('\n').length + ' linhas | ' + cols + ' colunas no CSV online', cols>=20?'ok':'error');
       break;
     } catch(e) { showDebug('Falhou: ' + e.message, 'warn'); }
   }
