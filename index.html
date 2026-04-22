@@ -1929,6 +1929,7 @@ function parseCSV(csv) {
   // Debug novas colunas
   showDebug(`Novos totais: Convs=${totConvs} Leads=${totLeads} Eng=${totEng} React=${totReact} Shares=${totShares} Saves=${totSaves}`, totConvs>0?'ok':'warn');
 
+  showDebug(`TOTAIS REAIS: Spent=${totSpent.toFixed(2)} Clicks=${totClicks} Imp=${totImpress} Reach=${totReachCalc}`, totSpent>0?'ok':'error');
   if (totSpent > 0 || totClicks > 0 || totImpress > 0) {
     D.meta.investimento.v = Math.round(totSpent * 100) / 100;
     D.meta.cliques.v      = totClicks;
