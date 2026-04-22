@@ -2171,19 +2171,19 @@ function parseMetaAdsCSV(csv) {
   const header = parseRow(lines[0]).map(h => h.toLowerCase());
   
   const iSpent   = header.findIndex(h => h.includes('valor usado'));
-  const iAlcance = header.findIndex(h => h === 'alcance');
-  const iImpress = header.findIndex(h => h === 'impressões' || h === 'impressoes');
+  const iAlcance = header.findIndex(h => h.includes('alcance'));
+  const iImpress = header.findIndex(h => h.includes('impress'));
   const iCliques = header.findIndex(h => h.includes('cliques no link'));
-  const iConvs   = header.findIndex(h => h.includes('conversas por mensagem'));
+  const iConvs   = header.findIndex(h => h.includes('conversas') || h.includes('mensagem iniciadas'));
   const iCtr     = header.findIndex(h => h.includes('ctr') && h.includes('link'));
   const iCpm     = header.findIndex(h => h.includes('cpm'));
   const iCpc     = header.findIndex(h => h.includes('cpc') && h.includes('link'));
-  const iFreq    = header.findIndex(h => h === 'frequência' || h === 'frequencia');
-  const iEng     = header.findIndex(h => h.includes('engajamentos com o post'));
-  const iReact   = header.findIndex(h => h.includes('reações ao post'));
-  const iCompart = header.findIndex(h => h.includes('compartilhamentos'));
-  const iSaves   = header.findIndex(h => h.includes('salvamentos'));
-  const iLeads   = header.findIndex(h => h.includes('novos contatos'));
+  const iFreq    = header.findIndex(h => h.includes('frequ'));
+  const iEng     = header.findIndex(h => h.includes('engajamentos com o post') || h.includes('engajamento com'));
+  const iReact   = header.findIndex(h => h.includes('rea') && h.includes('post'));
+  const iCompart = header.findIndex(h => h.includes('compartilhamento'));
+  const iSaves   = header.findIndex(h => h.includes('salvamento'));
+  const iLeads   = header.findIndex(h => h.includes('novos contatos') || h.includes('novos contato'));
 
   showDebug('Formato: Meta Ads CSV direto', 'ok');
   showDebug('Cols: spent='+iSpent+' alc='+iAlcance+' imp='+iImpress+' click='+iCliques, 'info');
@@ -2196,7 +2196,7 @@ function parseMetaAdsCSV(csv) {
   lines.slice(1).forEach(line => {
     if (!line.trim()) return;
     const row = parseRow(line);
-    const spent = parseFloat((row[iSpent]||'').replace(',','.')) || 0;
+    const spent = parseFloat((row[iSpent]||'').replace(',','.').replace(/[^0-9.]/g,'')) || 0;
     if (spent === 0) return; // ignorar campanhas sem gasto
     rowCount++;
 
