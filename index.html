@@ -1302,6 +1302,10 @@ function buildKPIs(platform, containerId) {
   const active = activeMetrics[platform];
   const data = D[platform];
 
+  if (platform === 'meta') {
+    showDebug(`buildKPIs: invest=${data.investimento?.v} imp=${data.impressoes?.v} active=${active?.length}`, data.investimento?.v > 0 ? 'ok' : 'warn');
+  }
+
   container.innerHTML = active
     .filter(id => !hiddenCards[id])
     .map(id => {
