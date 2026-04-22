@@ -961,7 +961,7 @@ let D = {
     cpa:{v:94.80,p:168.26}, cpconv:{v:94.80,p:168.26}, impressoes:{v:284500,p:301200}, alcance:{v:142300,p:158000},
     frequencia:{v:2.4,p:2.1}, cliques:{v:8432,p:7890}, cliquesTot:{v:10240,p:9870}, ctr:{v:1.82,p:1.65},
     engajamentos:{v:15200,p:14100}, reacoes:{v:9800,p:8900}, comentarios:{v:420,p:380}, compartilhamentos:{v:310,p:270},
-    leads:{v:190,p:144}, cpLead:{v:65.69,p:75.83}, compras:{v:48,p:62}, conversas:{v:27,p:41}, compartilhamentos:{v:0,p:0}, saves:{v:0,p:0},
+    leads:{v:190,p:144}, cpLead:{v:65.69,p:75.83}, compras:{v:48,p:62}, conversas:{v:27,p:41}, saves:{v:0,p:0},
     cpConversa:{v:462.24,p:266.59}, taxaConv:{v:2.25,p:1.83}, videoViews:{v:38000,p:29000},
     view3s:{v:28000,p:21000}, view25:{v:18000,p:14000}, view75:{v:9000,p:7000}, view100:{v:3500,p:2800},
     timeline:{
@@ -1308,14 +1308,22 @@ function buildKPIs(platform, containerId) {
   const container = document.getElementById(containerId);
   if (!container) return;
   const all = getAllMetrics(platform);
-  const active = activeMetrics[platform];
   const data = D[platform];
 
-  if (platform === 'meta') {
-    showDebug(`buildKPIs: invest=${data.investimento?.v} imp=${data.impressoes?.v} active=${active?.length}`, data.investimento?.v > 0 ? 'ok' : 'warn');
+  // Garantir activeMetrics válido
+  let active = activeMetrics[platform];
+  if (!active || !Array.isArray(active) || active.length === 0) {
+    active = ACTIVE_DEFAULTS[platform];
+    activeMetrics[platform] = active;
+  }
+  // Filtrar apenas IDs que existem na biblioteca
+  const validIds = active.filter(id => all.find(x => x.id === id));
+  if (validIds.length === 0) {
+    active = ACTIVE_DEFAULTS[platform];
+    activeMetrics[platform] = active;
   }
 
-  container.innerHTML = active
+  container.innerHTML = (activeMetrics[platform] || ACTIVE_DEFAULTS[platform])
     .filter(id => !hiddenCards[id])
     .map(id => {
       const m = all.find(x => x.id === id);
