@@ -912,7 +912,8 @@ function carregarActiveMetrics() {
 // Forçar reset sempre — garantir métricas limpas
 try {
   localStorage.removeItem('dualize_active_metrics');
-  localStorage.setItem('dualize_dash_version', '25');
+  localStorage.removeItem('dualize_hidden_cards');
+  localStorage.setItem('dualize_dash_version', '26');
 } catch(e) {}
 let activeMetrics = JSON.parse(JSON.stringify(ACTIVE_DEFAULTS));
 
@@ -1303,12 +1304,11 @@ function getAllMetrics(platform) {
 
 function buildKPIs(platform, containerId) {
   const container = document.getElementById(containerId);
-  if (!container) return;
+  if (!container) { showDebug('ERRO: container '+containerId+' nao encontrado!', 'error'); return; }
   const all = getAllMetrics(platform);
   const data = D[platform];
-  // Usar sempre ACTIVE_DEFAULTS como base
   const ids = ACTIVE_DEFAULTS[platform] || [];
-  container.innerHTML = ids
+  const html = ids
     .filter(id => !hiddenCards[id])
     .map(id => {
       const m = all.find(x => x.id === id);
@@ -1317,7 +1317,8 @@ function buildKPIs(platform, containerId) {
       if (!entry) return '';
       return makeKPI(id, m.label, entry.v, entry.p, m.format);
     }).join('');
-  // Sync activeMetrics
+  container.innerHTML = html;
+  if (platform === 'meta') showDebug('buildKPIs: '+ids.length+' ids, html='+html.length+' chars, invest='+data.investimento?.v, html.length>0?'ok':'error');
   activeMetrics[platform] = ids;
 }
 
