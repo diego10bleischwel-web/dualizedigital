@@ -1765,7 +1765,7 @@ function parseCSV(csv) {
     'Cortinar Ambientes': ['cortinar'],
     'Hospital do Dente':  ['hospital do dente', 'hospital dente', 'centro odontol'],
     // Planilha tem: "anúncios - Sólido Sentimento", "Sólido Sentimento | Presentes Personalizados"
-    'Sólido Sentimento':  ['sólido sentimento', 'solido sentimento', 'sólido', 'solido'],
+    'Sólido Sentimento':  ['sólido sentimento', 'solido sentimento', 'sólido', 'solido', 'presentes personalizados', 'anúncios - sólido', 'anuncios - solido'],
   };
 
   // Usar data local (sem timezone) para evitar deslocamento UTC-3
@@ -1902,6 +1902,15 @@ function parseCSV(csv) {
     if (isAd) dbgAnuncios++; else dbgOrg++;
   });
   showDebug(`Linhas no período: ${dbgAnuncios} anúncios + ${dbgOrg} orgânicas`, dbgAnuncios>0?'ok':'error');
+  // Mostrar nomes únicos de contas encontradas no período para debug
+  const nomesUnicos = [...new Set(lines.slice(1).map(r => (r[iAcc]||'').trim()).filter(n => n && (()=>{
+    const dt = iDate>=0?(r=>r[iDate]||'')(r):''
+    return true;
+  })()))].slice(0,5);
+  showDebug('Contas no CSV: '+[...new Set(lines.slice(1).filter(r=>{
+    const dt=(r[iDate]||'').trim().slice(0,10);
+    return dt>=pStartStr&&dt<=pEndStr;
+  }).map(r=>(r[iAcc]||'').trim()))].slice(0,6).join(' | '), 'info');
   showDebug(`Linhas CSV: ${lines.length} | Colunas: ${h.length}`, 'info');
   showDebug(`iDate=${iDate} iAcc=${iAcc} iSpent=${iSpent} iImpress=${iImpress} iReach=${iReach} iClicks=${iClicks}`, 'info');
   if(iDate>=0) showDebug(`Col Date (${iDate}): "${lines[0][iDate]}" | Ex: "${(lines[1]||[])[iDate]||'?'}"`, 'ok');
