@@ -1629,7 +1629,14 @@ function showDebug(msg, type='info') {
 
 async function loadData() {
   if (currentCliente === 'Nenhum') return;
-  _csvImportado = null;
+  // Se tem CSV importado do Meta Ads, usar ele e buscar Porter em paralelo
+  if (_csvImportado) {
+    showDebug('Usando CSV importado + buscando planilha...', 'info');
+    const lns = _csvImportado.split('\n');
+    if (isMetaAdsCSV(lns)) { parseMetaAdsCSV(_csvImportado); buildDash(); }
+    else { parseCSV(_csvImportado); buildDash(); }
+    return;
+  }
   showDebug('Buscando planilha online...', 'info');
   toast('Atualizando dados...');
   const urls = [
@@ -1953,21 +1960,23 @@ function parseCSV(csv) {
 
   showDebug(`TOTAIS REAIS: Spent=${totSpent.toFixed(2)} Clicks=${totClicks} Imp=${totImpress} Reach=${totReachCalc}`, totSpent>0?'ok':'error');
   if (totSpent > 0 || totClicks > 0 || totImpress > 0) {
-    D.meta.investimento.v = Math.round(totSpent * 100) / 100;
-    D.meta.cliques.v      = totClicks;
-    D.meta.impressoes.v   = totImpress;
-    D.meta.alcance.v      = totReachCalc || totReach;
-    if (totConvs  > 0) D.meta.conversas.v        = totConvs;
-    if (totLeads  > 0) D.meta.leads.v             = totLeads;
-    if (totEng    > 0) D.meta.engajamentos.v      = totEng;
-    if (totReact  > 0) D.meta.reacoes.v           = totReact;
-    if (totShares > 0) D.meta.compartilhamentos.v = totShares;
-    if (totSaves  > 0) D.meta.saves.v             = totSaves;
-    if (ctrCount  > 0) D.meta.ctr.v   = parseFloat((ctrSum  / ctrCount).toFixed(2));
-    if (cpmCount  > 0) D.meta.cpm.v   = parseFloat((cpmSum  / cpmCount).toFixed(2));
-    if (freqCount > 0) D.meta.frequencia.v = parseFloat((freqSum / freqCount).toFixed(2));
-    if (ctrCount  > 0 && totClicks > 0 && totSpent > 0) D.meta.cpc.v = parseFloat((totSpent / totClicks).toFixed(2));
-    if (totFollow > 0) D.instagram.seguidores.v = totFollow;
+    const safeSet = (obj, key, val) => { if(obj && obj[key] !== undefined) obj[key].v = val; };
+    safeSet(D.meta, 'investimento', Math.round(totSpent * 100) / 100);
+    safeSet(D.meta, 'cliques',      totClicks);
+    safeSet(D.meta, 'impressoes',   totImpress);
+    safeSet(D.meta, 'alcance',      totReachCalc || totReach);
+    if (totConvs  > 0) safeSet(D.meta, 'conversas',        totConvs);
+    if (totLeads  > 0) safeSet(D.meta, 'leads',            totLeads);
+    if (totEng    > 0) safeSet(D.meta, 'engajamentos',     totEng);
+    if (totReact  > 0) safeSet(D.meta, 'reacoes',          totReact);
+    if (totShares > 0) safeSet(D.meta, 'compartilhamentos',totShares);
+    if (totSaves  > 0) safeSet(D.meta, 'saves',            totSaves);
+    if (ctrCount  > 0) safeSet(D.meta, 'ctr',   parseFloat((ctrSum  / ctrCount).toFixed(2)));
+    if (cpmCount  > 0) safeSet(D.meta, 'cpm',   parseFloat((cpmSum  / cpmCount).toFixed(2)));
+    if (freqCount > 0) safeSet(D.meta, 'frequencia', parseFloat((freqSum / freqCount).toFixed(2)));
+    if (totClicks > 0 && totSpent > 0) safeSet(D.meta, 'cpc', parseFloat((totSpent / totClicks).toFixed(2)));
+    if (totFollow > 0 && D.instagram.seguidores) D.instagram.seguidores.v = totFollow;
+    showDebug('TOTAIS OK: R$'+totSpent.toFixed(2)+' | Imp:'+totImpress+' | Alc:'+(totReachCalc||totReach), 'ok');
 
     const ds = Object.keys(tl).sort().slice(-14);
     if (ds.length > 0) {
@@ -2231,10 +2240,11 @@ function parseMetaAdsCSV(csv) {
   showDebug('Imp: '+totImpress.toLocaleString('pt-BR')+' | Alc: '+totAlcance.toLocaleString('pt-BR'), 'ok');
 
   if (totSpent > 0) {
-    D.meta.investimento.v = Math.round(totSpent * 100) / 100;
-    D.meta.cliques.v      = totCliques;
-    D.meta.impressoes.v   = totImpress;
-    D.meta.alcance.v      = totAlcance;
+    const safeSet2 = (obj, key, val) => { if(obj && obj[key] !== undefined) obj[key].v = val; };
+    safeSet2(D.meta, 'investimento', Math.round(totSpent * 100) / 100);
+    safeSet2(D.meta, 'cliques',      totCliques);
+    safeSet2(D.meta, 'impressoes',   totImpress);
+    safeSet2(D.meta, 'alcance',      totAlcance);
     D.meta.conversas.v    = totConvs;
     D.meta.engajamentos.v = totEng;
     D.meta.reacoes.v      = totReact;
