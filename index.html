@@ -1653,8 +1653,7 @@ async function loadData() {
   }
   if (csv) {
     parseCSV(csv);
-    setPlatform(currentPlatform || 'all');
-    buildDash();
+    // buildDash é chamado dentro de parseCSV após safeSet
     updatePeriodDisplay();
     toast('Dados atualizados!');
   } else {
@@ -1981,6 +1980,8 @@ function parseCSV(csv) {
     if (totClicks > 0 && totSpent > 0) safeSet(D.meta, 'cpc', parseFloat((totSpent / totClicks).toFixed(2)));
     if (totFollow > 0 && D.instagram.seguidores) D.instagram.seguidores.v = totFollow;
     showDebug('TOTAIS OK: R$'+totSpent.toFixed(2)+' | Imp:'+totImpress+' | Alc:'+(totReachCalc||totReach), 'ok');
+    // Renderizar cards com dados reais
+    setTimeout(() => { setPlatform(currentPlatform || 'all'); buildDash(); }, 0);
 
     const ds = Object.keys(tl).sort().slice(-14);
     if (ds.length > 0) {
