@@ -909,15 +909,12 @@ function carregarActiveMetrics() {
   } catch(e) {}
   return JSON.parse(JSON.stringify(ACTIVE_DEFAULTS));
 }
-// Forçar reset se versão antiga
+// Forçar reset sempre — garantir métricas limpas
 try {
-  const v = localStorage.getItem('dualize_dash_version');
-  if (v !== '24') {
-    localStorage.removeItem('dualize_active_metrics');
-    localStorage.setItem('dualize_dash_version', '24');
-  }
+  localStorage.removeItem('dualize_active_metrics');
+  localStorage.setItem('dualize_dash_version', '25');
 } catch(e) {}
-let activeMetrics = carregarActiveMetrics();
+let activeMetrics = JSON.parse(JSON.stringify(ACTIVE_DEFAULTS));
 
 // Métricas ocultas (via ✕)
 let hiddenCards = {};
@@ -1309,21 +1306,9 @@ function buildKPIs(platform, containerId) {
   if (!container) return;
   const all = getAllMetrics(platform);
   const data = D[platform];
-
-  // Garantir activeMetrics válido
-  let active = activeMetrics[platform];
-  if (!active || !Array.isArray(active) || active.length === 0) {
-    active = ACTIVE_DEFAULTS[platform];
-    activeMetrics[platform] = active;
-  }
-  // Filtrar apenas IDs que existem na biblioteca
-  const validIds = active.filter(id => all.find(x => x.id === id));
-  if (validIds.length === 0) {
-    active = ACTIVE_DEFAULTS[platform];
-    activeMetrics[platform] = active;
-  }
-
-  container.innerHTML = (activeMetrics[platform] || ACTIVE_DEFAULTS[platform])
+  // Usar sempre ACTIVE_DEFAULTS como base
+  const ids = ACTIVE_DEFAULTS[platform] || [];
+  container.innerHTML = ids
     .filter(id => !hiddenCards[id])
     .map(id => {
       const m = all.find(x => x.id === id);
@@ -1332,6 +1317,8 @@ function buildKPIs(platform, containerId) {
       if (!entry) return '';
       return makeKPI(id, m.label, entry.v, entry.p, m.format);
     }).join('');
+  // Sync activeMetrics
+  activeMetrics[platform] = ids;
 }
 
 // ═══════════════════════════════════════════════════
