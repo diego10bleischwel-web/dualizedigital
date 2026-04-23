@@ -1305,6 +1305,9 @@ function getAllMetrics(platform) {
 function buildKPIs(platform, containerId) {
   const container = document.getElementById(containerId);
   if (!container) { showDebug('ERRO: container '+containerId+' nao encontrado!', 'error'); return; }
+  // Garantir que a seção está visível
+  const sec = document.getElementById('section-'+platform);
+  if (sec && sec.style.display === 'none') sec.style.display = '';
   const all = getAllMetrics(platform);
   const data = D[platform];
   const ids = ACTIVE_DEFAULTS[platform] || [];
@@ -1650,11 +1653,13 @@ async function loadData() {
   }
   if (csv) {
     parseCSV(csv);
+    setPlatform(currentPlatform || 'all');
     buildDash();
     updatePeriodDisplay();
     toast('Dados atualizados!');
   } else {
     showDebug('Planilha inacessivel - dados de exemplo', 'error');
+    setPlatform(currentPlatform || 'all');
     buildDash();
     toast('Sem acesso a planilha - dados de exemplo');
   }
