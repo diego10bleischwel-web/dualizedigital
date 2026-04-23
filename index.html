@@ -1629,12 +1629,14 @@ function showDebug(msg, type='info') {
 
 async function loadData() {
   if (currentCliente === 'Nenhum') return;
-  // Se tem CSV importado do Meta Ads, usar ele e buscar Porter em paralelo
+  // Se tem CSV importado, usar APENAS ele — não buscar planilha online
   if (_csvImportado) {
-    showDebug('Usando CSV importado + buscando planilha...', 'info');
+    showDebug('Usando CSV importado (Meta Ads)', 'ok');
     const lns = _csvImportado.split('\n');
-    if (isMetaAdsCSV(lns)) { parseMetaAdsCSV(_csvImportado); buildDash(); }
-    else { parseCSV(_csvImportado); buildDash(); }
+    if (isMetaAdsCSV(lns)) { parseMetaAdsCSV(_csvImportado); }
+    else { parseCSV(_csvImportado); }
+    buildDash();
+    updatePeriodDisplay();
     return;
   }
   showDebug('Buscando planilha online...', 'info');
