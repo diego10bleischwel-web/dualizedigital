@@ -1,734 +1,202 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Painel Financeiro Dualize</title>
-  <style>
-    :root {
-      --bg: #f5f2ee;
-      --card: #ffffff;
-      --text: #363636;
-      --muted: #7a7470;
-      --line: #e3ddd7;
-      --dark: #363636;
-      --brown: #815d46;
-      --brown-soft: #ede5de;
-      --green: #dff3e4;
-      --green-text: #287043;
-      --yellow: #fff2c8;
-      --yellow-text: #8b6500;
-      --red: #ffe1df;
-      --red-text: #9b2c22;
-      --blue: #e7eef7;
-      --blue-text: #34506d;
-      --shadow: 0 18px 45px rgba(54, 54, 54, 0.08);
-      --radius: 24px;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel Financeiro PRO</title>
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: Inter, Arial, sans-serif;
-    }
+<style>
+:root{
+  --bg:#f5f2ee;
+  --card:#ffffff;
+  --text:#2f2f2f;
+  --muted:#8a837c;
+  --line:#e7e1db;
+  --primary:#2f2f2f;
+  --accent:#815d46;
 
-    body {
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      padding-bottom: 90px;
-    }
+  --green:#e3f6ea;
+  --green-text:#1f7a46;
+  --yellow:#fff4d6;
+  --yellow-text:#9c6b00;
+  --red:#ffe4e2;
+  --red-text:#b42318;
+}
 
-    .app {
-      max-width: 1220px;
-      margin: 0 auto;
-      padding: 28px 18px;
-    }
+*{box-sizing:border-box;font-family:Inter,Arial}
+body{margin:0;background:var(--bg);color:var(--text)}
 
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 16px;
-      margin-bottom: 22px;
-    }
+.container{max-width:1300px;margin:auto;padding:30px}
 
-    .brand small {
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      color: var(--brown);
-      font-weight: 800;
-      font-size: 11px;
-    }
+h1{font-size:42px;margin-bottom:20px}
 
-    .brand h1 {
-      font-size: clamp(28px, 4vw, 44px);
-      line-height: 1.05;
-      margin-top: 6px;
-    }
+.dashboard{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:15px;
+  margin-bottom:25px;
+}
 
-    .top-actions {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-      flex-wrap: wrap;
-      justify-content: flex-end;
-    }
+.card{
+  background:var(--card);
+  padding:18px;
+  border-radius:16px;
+  border:1px solid var(--line);
+}
 
-    .pill {
-      background: var(--card);
-      border: 1px solid var(--line);
-      border-radius: 999px;
-      padding: 10px 14px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      box-shadow: var(--shadow);
-      min-height: 46px;
-    }
+.card span{font-size:13px;color:var(--muted)}
+.card strong{font-size:22px;display:block;margin-top:5px}
 
-    select, input {
-      border: none;
-      outline: none;
-      background: transparent;
-      color: var(--text);
-      font-size: 14px;
-      font-weight: 700;
-    }
+.main{
+  display:grid;
+  grid-template-columns:2fr 1fr;
+  gap:20px;
+}
 
-    .btn {
-      border: none;
-      border-radius: 999px;
-      padding: 12px 16px;
-      font-weight: 800;
-      cursor: pointer;
-      transition: 0.2s ease;
-      white-space: nowrap;
-    }
+.table-card{padding:20px}
 
-    .btn-primary {
-      background: var(--dark);
-      color: white;
-    }
+.table-card h2{margin-bottom:15px}
 
-    .btn-soft {
-      background: var(--brown-soft);
-      color: var(--brown);
-    }
+.table-wrapper{
+  max-height:500px;
+  overflow:auto;
+}
 
-    .btn:hover {
-      transform: translateY(-1px);
-      opacity: 0.94;
-    }
+table{width:100%;border-collapse:collapse}
+th,td{padding:12px;border-bottom:1px solid var(--line)}
+th{font-size:12px;color:var(--muted)}
 
-    .summary {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 14px;
-      margin-bottom: 20px;
-    }
+tr{transition:0.2s}
 
-    .summary-card {
-      background: var(--card);
-      border: 1px solid var(--line);
-      border-radius: 20px;
-      padding: 18px;
-      box-shadow: var(--shadow);
-    }
+.status-btns{
+  display:flex;
+  gap:5px;
+}
 
-    .summary-card span {
-      color: var(--muted);
-      font-size: 13px;
-    }
+.status-btn{
+  border:none;
+  padding:6px 10px;
+  border-radius:20px;
+  font-weight:700;
+  cursor:pointer;
+  opacity:0.5;
+}
 
-    .summary-card strong {
-      display: block;
-      margin-top: 8px;
-      font-size: 22px;
-    }
+.status-btn.active{opacity:1}
 
-    .summary-card small {
-      display: inline-block;
-      margin-top: 8px;
-      color: var(--brown);
-      font-weight: 800;
-    }
+.pago{background:var(--green);color:var(--green-text)}
+.pendente{background:var(--yellow);color:var(--yellow-text)}
+.nao{background:var(--red);color:var(--red-text)}
 
-    .grid {
-      display: grid;
-      grid-template-columns: 1.15fr 0.85fr;
-      gap: 20px;
-      align-items: start;
-    }
+input{padding:8px;border-radius:8px;border:1px solid var(--line)}
 
-    .card {
-      background: var(--card);
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      overflow: hidden;
-    }
+.side-card{padding:20px}
 
-    .card-head {
-      padding: 18px 20px;
-      border-bottom: 1px solid var(--line);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-    }
+button{
+  background:var(--primary);
+  color:white;
+  border:none;
+  padding:12px;
+  border-radius:10px;
+  cursor:pointer;
+}
 
-    .card-head h2 {
-      font-size: 19px;
-    }
-
-    .card-head p {
-      color: var(--muted);
-      font-size: 13px;
-      margin-top: 3px;
-      line-height: 1.35;
-    }
-
-    .tabs {
-      display: flex;
-      gap: 8px;
-      margin: 18px 0;
-      overflow-x: auto;
-    }
-
-    .tab {
-      border: 1px solid var(--line);
-      background: var(--card);
-      padding: 10px 14px;
-      border-radius: 999px;
-      cursor: pointer;
-      font-weight: 800;
-      color: var(--muted);
-    }
-
-    .tab.active {
-      background: var(--dark);
-      color: white;
-    }
-
-    .table-wrap {
-      overflow-x: auto;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      min-width: 740px;
-    }
-
-    th, td {
-      padding: 13px 16px;
-      text-align: left;
-      border-bottom: 1px solid var(--line);
-      font-size: 14px;
-      vertical-align: middle;
-    }
-
-    th {
-      color: var(--muted);
-      font-size: 12px;
-      text-transform: uppercase;
-      letter-spacing: 0.6px;
-      background: #fbfaf8;
-    }
-
-    td input, td select, .form input, .form select {
-      width: 100%;
-      border: 1px solid var(--line);
-      border-radius: 12px;
-      padding: 10px 11px;
-      outline: none;
-      background: #fff;
-      color: var(--text);
-      font-weight: 700;
-    }
-
-    .money-input {
-      max-width: 140px;
-      background: #fbfaf8 !important;
-      border-color: var(--line) !important;
-    }
-
-    .quick-status {
-      display: flex;
-      gap: 6px;
-      min-width: 220px;
-    }
-
-    .quick-status button {
-      border: none;
-      border-radius: 999px;
-      padding: 8px 10px;
-      font-size: 12px;
-      font-weight: 900;
-      cursor: pointer;
-      opacity: 0.55;
-    }
-
-    .quick-status button.active {
-      opacity: 1;
-      box-shadow: inset 0 0 0 2px rgba(54,54,54,0.08);
-    }
-
-    .st-pago { background: var(--green); color: var(--green-text); }
-    .st-pendente { background: var(--yellow); color: var(--yellow-text); }
-    .st-nao { background: var(--red); color: var(--red-text); }
-
-    .status-row-pago { background: rgba(223, 243, 228, 0.25); }
-    .status-row-pendente { background: rgba(255, 242, 200, 0.30); }
-    .status-row-nao { background: rgba(255, 225, 223, 0.35); }
-
-    .side {
-      display: grid;
-      gap: 20px;
-    }
-
-    .form {
-      padding: 20px;
-      display: grid;
-      gap: 12px;
-    }
-
-    .form label {
-      font-size: 12px;
-      color: var(--muted);
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      display: block;
-      margin-bottom: 7px;
-    }
-
-    .form .row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-
-    .planning {
-      padding: 20px;
-      display: grid;
-      gap: 14px;
-    }
-
-    .budget-line {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      padding: 14px;
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      background: #fbfaf8;
-    }
-
-    .budget-line span {
-      color: var(--muted);
-      font-size: 13px;
-      font-weight: 800;
-    }
-
-    .budget-line strong {
-      font-size: 18px;
-    }
-
-    .debt-list {
-      display: grid;
-      gap: 10px;
-      padding: 0 20px 20px;
-    }
-
-    .debt-item {
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      padding: 14px;
-      display: grid;
-      gap: 10px;
-      background: #fff;
-    }
-
-    .debt-top {
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      align-items: center;
-    }
-
-    .debt-top strong {
-      font-size: 15px;
-    }
-
-    .tag {
-      border-radius: 999px;
-      padding: 6px 9px;
-      font-size: 11px;
-      font-weight: 900;
-      background: var(--blue);
-      color: var(--blue-text);
-    }
-
-    .bar {
-      height: 12px;
-      border-radius: 999px;
-      background: #eee8e2;
-      overflow: hidden;
-    }
-
-    .bar span {
-      display: block;
-      height: 100%;
-      background: var(--brown);
-      border-radius: 999px;
-    }
-
-    .suggestion {
-      background: var(--brown-soft);
-      color: var(--brown);
-      border-radius: 18px;
-      padding: 14px;
-      font-size: 14px;
-      line-height: 1.45;
-      font-weight: 700;
-    }
-
-    .mobile-nav {
-      position: fixed;
-      bottom: 14px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: calc(100% - 28px);
-      max-width: 560px;
-      background: rgba(255,255,255,0.94);
-      border: 1px solid var(--line);
-      border-radius: 999px;
-      padding: 8px;
-      box-shadow: var(--shadow);
-      display: none;
-      justify-content: space-between;
-      z-index: 20;
-      backdrop-filter: blur(14px);
-    }
-
-    .mobile-nav button {
-      border: none;
-      background: transparent;
-      padding: 10px 12px;
-      border-radius: 999px;
-      font-weight: 800;
-      color: var(--muted);
-    }
-
-    .mobile-nav button.active {
-      background: var(--dark);
-      color: white;
-    }
-
-    @media (max-width: 980px) {
-      .grid, .summary {
-        grid-template-columns: 1fr;
-      }
-
-      header {
-        align-items: flex-start;
-        flex-direction: column;
-      }
-
-      .top-actions, .pill {
-        width: 100%;
-      }
-
-      .pill select, .pill input {
-        width: 100%;
-      }
-
-      .desktop-only {
-        display: none;
-      }
-
-      .mobile-nav {
-        display: flex;
-      }
-    }
-  </style>
+</style>
 </head>
+
 <body>
-  <div class="app">
-    <header>
-      <div class="brand">
-        <small>Google Sheets + Dashboard HTML</small>
-        <h1>Painel Financeiro</h1>
-      </div>
-      <div class="top-actions">
-        <div class="pill">
-          <span>📅</span>
-          <select>
-            <option>Abril 2026</option>
-            <option>Maio 2026</option>
-            <option>Junho 2026</option>
-          </select>
-        </div>
-        <div class="pill">
-          <span>💰</span>
-          <input value="R$ 3.420,00" aria-label="Saldo no banco" />
-        </div>
-      </div>
-    </header>
 
-    <section id="dashboard" class="summary">
-      <div class="summary-card">
-        <span>Saldo no banco</span>
-        <strong>R$ 3.420,00</strong>
-        <small>base do mês</small>
-      </div>
-      <div class="summary-card">
-        <span>Já pago</span>
-        <strong>R$ 1.285,00</strong>
-        <small>ok</small>
-      </div>
-      <div class="summary-card">
-        <span>Pendente</span>
-        <strong>R$ 820,00</strong>
-        <small>acompanhar</small>
-      </div>
-      <div class="summary-card">
-        <span>Não pago</span>
-        <strong>R$ 450,00</strong>
-        <small>prioridade</small>
-      </div>
-      <div class="summary-card">
-        <span>Previsão de sobra</span>
-        <strong>R$ 865,00</strong>
-        <small>após contas</small>
-      </div>
-    </section>
+<div class="container">
 
-    <div class="tabs desktop-only">
-      <button class="tab active">Contas do mês</button>
-      <button class="tab">Fixas cadastradas</button>
-      <button class="tab">Dívidas</button>
-      <button class="tab">Planejamento</button>
-      <button class="tab">Dashboard</button>
-    </div>
+<h1>Painel Financeiro</h1>
 
-    <main class="grid">
-      <section id="controle" class="card">
-        <div class="card-head">
-          <div>
-            <h2>Contas do mês</h2>
-            <p>Contas fixas já aparecem cadastradas. Você só ajusta valor e marca o status em 1 clique.</p>
-          </div>
-          <button class="btn btn-primary">+ Nova conta</button>
-        </div>
+<div class="dashboard">
+  <div class="card"><span>Saldo</span><strong>R$ 3.420</strong></div>
+  <div class="card"><span>Pago</span><strong>R$ 1.285</strong></div>
+  <div class="card"><span>Pendente</span><strong>R$ 820</strong></div>
+  <div class="card"><span>Não pago</span><strong>R$ 450</strong></div>
+  <div class="card"><span>Sobra</span><strong>R$ 865</strong></div>
+</div>
 
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Conta</th>
-                <th>Categoria</th>
-                <th>Venc.</th>
-                <th>Valor</th>
-                <th>Status rápido</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr class="status-row-pago">
-                <td><strong>Aluguel</strong></td>
-                <td>Casa</td>
-                <td><input type="date" value="2026-04-10" /></td>
-                <td><input class="money-input" value="R$ 1.200,00" /></td>
-                <td>
-                  <div class="quick-status">
-                    <button class="st-pago active">Pago</button>
-                    <button class="st-pendente">Pendente</button>
-                    <button class="st-nao">Não pago</button>
-                  </div>
-                </td>
-              </tr>
-              <tr class="status-row-pendente">
-                <td><strong>Energia</strong></td>
-                <td>Casa</td>
-                <td><input type="date" value="2026-04-18" /></td>
-                <td><input class="money-input" value="R$ 280,00" /></td>
-                <td>
-                  <div class="quick-status">
-                    <button class="st-pago">Pago</button>
-                    <button class="st-pendente active">Pendente</button>
-                    <button class="st-nao">Não pago</button>
-                  </div>
-                </td>
-              </tr>
-              <tr class="status-row-nao">
-                <td><strong>Cartão de crédito</strong></td>
-                <td>Dívidas</td>
-                <td><input type="date" value="2026-04-25" /></td>
-                <td><input class="money-input" value="R$ 450,00" /></td>
-                <td>
-                  <div class="quick-status">
-                    <button class="st-pago">Pago</button>
-                    <button class="st-pendente">Pendente</button>
-                    <button class="st-nao active">Não pago</button>
-                  </div>
-                </td>
-              </tr>
-              <tr class="status-row-pago">
-                <td><strong>Internet</strong></td>
-                <td>Trabalho</td>
-                <td><input type="date" value="2026-04-12" /></td>
-                <td><input class="money-input" value="R$ 119,90" /></td>
-                <td>
-                  <div class="quick-status">
-                    <button class="st-pago active">Pago</button>
-                    <button class="st-pendente">Pendente</button>
-                    <button class="st-nao">Não pago</button>
-                  </div>
-                </td>
-              </tr>
-              <tr class="status-row-pendente">
-                <td><strong>Mercado</strong></td>
-                <td>Variável</td>
-                <td><input type="date" value="2026-04-27" /></td>
-                <td><input class="money-input" value="R$ 350,00" /></td>
-                <td>
-                  <div class="quick-status">
-                    <button class="st-pago">Pago</button>
-                    <button class="st-pendente active">Pendente</button>
-                    <button class="st-nao">Não pago</button>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
+<div class="main">
 
-      <aside class="side">
-        <section id="lancar" class="card">
-          <div class="card-head">
-            <div>
-              <h2>Lançamento rápido</h2>
-              <p>Para gasto novo, compra avulsa ou valor variável.</p>
-            </div>
-          </div>
-          <div class="form">
-            <div>
-              <label>Descrição</label>
-              <input placeholder="Ex: Farmácia, mercado, parcela..." />
-            </div>
-            <div class="row">
-              <div>
-                <label>Valor</label>
-                <input placeholder="R$ 0,00" />
-              </div>
-              <div>
-                <label>Status</label>
-                <select>
-                  <option>Pendente</option>
-                  <option>Pago</option>
-                  <option>Não pago</option>
-                </select>
-              </div>
-            </div>
-            <div class="row">
-              <div>
-                <label>Categoria</label>
-                <select>
-                  <option>Casa</option>
-                  <option>Trabalho</option>
-                  <option>Dívidas</option>
-                  <option>Mercado</option>
-                  <option>Outros</option>
-                </select>
-              </div>
-              <div>
-                <label>Vencimento</label>
-                <input type="date" />
-              </div>
-            </div>
-            <button class="btn btn-primary">Adicionar no mês</button>
-            <button class="btn btn-soft">Salvar como conta fixa</button>
-          </div>
-        </section>
+<div class="card table-card">
+<h2>Contas do mês</h2>
 
-        <section id="planejamento" class="card">
-          <div class="card-head">
-            <div>
-              <h2>Planejamento de quitação</h2>
-              <p>Baseado no orçamento disponível, o painel sugere a melhor ordem de pagamento.</p>
-            </div>
-          </div>
-          <div class="planning">
-            <div class="budget-line">
-              <span>Disponível para quitar dívidas</span>
-              <strong>R$ 600,00</strong>
-            </div>
-            <div class="budget-line">
-              <span>Dívidas em aberto</span>
-              <strong>R$ 2.850,00</strong>
-            </div>
-            <div class="suggestion">
-              Estratégia sugerida: quitar primeiro as dívidas pequenas e vencidas para limpar o mês, depois direcionar a sobra para a dívida com maior parcela ou juros.
-            </div>
-          </div>
+<div class="table-wrapper">
+<table id="tabela">
+<thead>
+<tr>
+<th>Conta</th>
+<th>Valor</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr draggable="true">
+<td>Aluguel</td>
+<td><input value="1200"></td>
+<td>
+<div class="status-btns">
+<button class="status-btn pago active">Pago</button>
+<button class="status-btn pendente">Pendente</button>
+<button class="status-btn nao">Não</button>
+</div>
+</td>
+</tr>
+<tr draggable="true">
+<td>Energia</td>
+<td><input value="280"></td>
+<td>
+<div class="status-btns">
+<button class="status-btn pago">Pago</button>
+<button class="status-btn pendente active">Pendente</button>
+<button class="status-btn nao">Não</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 
-          <div class="debt-list">
-            <div class="debt-item">
-              <div class="debt-top">
-                <strong>Cartão de crédito</strong>
-                <span class="tag">prioridade 1</span>
-              </div>
-              <div class="bar"><span style="width: 72%"></span></div>
-              <small>Restante: R$ 1.850,00 • Parcela sugerida: R$ 400,00</small>
-            </div>
-            <div class="debt-item">
-              <div class="debt-top">
-                <strong>Parcela loja</strong>
-                <span class="tag">prioridade 2</span>
-              </div>
-              <div class="bar"><span style="width: 45%"></span></div>
-              <small>Restante: R$ 600,00 • Parcela sugerida: R$ 150,00</small>
-            </div>
-            <div class="debt-item">
-              <div class="debt-top">
-                <strong>Empréstimo</strong>
-                <span class="tag">acompanhar</span>
-              </div>
-              <div class="bar"><span style="width: 30%"></span></div>
-              <small>Restante: R$ 400,00 • Parcela sugerida: R$ 50,00</small>
-            </div>
-          </div>
-        </section>
-      </aside>
-    </main>
-  </div>
+<div class="card side-card">
+<h2>Lançamento rápido</h2>
+<input placeholder="Descrição"><br><br>
+<input placeholder="Valor"><br><br>
+<button>Adicionar</button>
+</div>
 
-  <nav class="mobile-nav">
-    <button class="active">Contas</button>
-    <button>Lançar</button>
-    <button>Planejar</button>
-    <button>Resumo</button>
-  </nav>
+</div>
 
-  <script>
-    document.querySelectorAll('.quick-status').forEach(group => {
-      const row = group.closest('tr');
-      group.querySelectorAll('button').forEach(btn => {
-        btn.addEventListener('click', () => {
-          group.querySelectorAll('button').forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
-          row.classList.remove('status-row-pago', 'status-row-pendente', 'status-row-nao');
-          if (btn.textContent.trim() === 'Pago') row.classList.add('status-row-pago');
-          if (btn.textContent.trim() === 'Pendente') row.classList.add('status-row-pendente');
-          if (btn.textContent.trim() === 'Não pago') row.classList.add('status-row-nao');
-        });
-      });
-    });
-  </script>
+</div>
+
+<script>
+
+// STATUS CLICK
+
+document.querySelectorAll(".status-btns").forEach(group=>{
+  group.querySelectorAll("button").forEach(btn=>{
+    btn.addEventListener("click",()=>{
+      group.querySelectorAll("button").forEach(b=>b.classList.remove("active"));
+      btn.classList.add("active");
+    })
+  })
+})
+
+// DRAG ROWS
+
+let dragged;
+
+document.querySelectorAll("tr").forEach(row=>{
+  row.addEventListener("dragstart",()=>dragged=row)
+  row.addEventListener("dragover",e=>e.preventDefault())
+  row.addEventListener("drop",()=>{
+    row.parentNode.insertBefore(dragged,row)
+  })
+})
+
+</script>
+
 </body>
 </html>
